@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Urinario Interactivo | CBTIS 38</title>
+    <style>
+        :root {
+            --female-color: #ff66b3;
+            --male-color: #3399ff;
+            --highlight: #f1c40f;
+            --correct: #2ecc71;
+            --incorrect: #e74c3c;
+            --timer: #9b59b6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e6f7ff, #cceeff);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0056b3, #003366);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--female-color), var(--male-color));
+        }
+        
+        .header img {
+            height: 90px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 2em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .title {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, var(--female-color), var(--male-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin: 20px 0;
+            animation: pulse 2s infinite, float 6s ease-in-out infinite;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .gender-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .gender-tab {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .gender-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.3) 50%, transparent 75%);
+            background-size: 400% 400%;
+            z-index: -1;
+            transition: all 0.6s;
+            opacity: 0;
+        }
+        
+        .gender-tab:hover::before {
+            opacity: 1;
+            animation: shine 2s linear infinite;
+        }
+        
+        @keyframes shine {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        #female-tab {
+            background: linear-gradient(135deg, var(--female-color), #cc0066);
+            color: white;
+        }
+        
+        #male-tab {
+            background: linear-gradient(135deg, var(--male-color), #0066cc);
+            color: white;
+        }
+        
+        .gender-section {
+            margin: 30px 0;
+            padding: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .gender-section.active {
+            display: block;
+        }
+        
+        .gender-header {
+            padding: 20px;
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #female-header {
+            background: linear-gradient(90deg, var(--female-color), #cc0066);
+        }
+        
+        #male-header {
+            background: linear-gradient(90deg, var(--male-color), #0066cc);
+        }
+        
+        .parts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .part-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.4s;
+            border-top: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .part-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .part-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--female-color), var(--male-color));
+            transition: all 0.4s;
+        }
+        
+        .part-card:hover::after {
+            height: 10px;
+        }
+        
+        .female-part {
+            border-color: var(--female-color);
+        }
+        
+        .male-part {
+            border-color: var(--male-color);
+        }
+        
+        .part-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .female-part h3::before {
+            content: '👩';
+        }
+        
+        .male-part h3::before {
+            content: '👨';
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 40px auto;
+            display: block;
+            transition: all 0.4s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            font-weight: bold;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .action-btn::after {
+            content: '»';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover::after {
+            opacity: 1;
+            right: 15px;
+        }
+        
+        /* Modo Juego - Preguntas */
+        .quiz-container {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin: 30px 0;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #95a5a6;
+        }
+        
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .question-counter {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        
+        .timer {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--timer);
+            background: rgba(155, 89, 182, 0.1);
+            padding: 5px 15px;
+            border-radius: 50px;
+        }
+        
+        .question-text {
+            font-size: 1.4em;
+            margin: 20px 0;
+            line-height: 1.5;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 1.1em;
+        }
+        
+        .option-btn:hover {
+            background: #f8f9fa;
+            border-color: #aaa;
+        }
+        
+        .option-btn.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: var(--correct);
+            color: var(--correct);
+        }
+        
+        .option-btn.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: var(--incorrect);
+            color: var(--incorrect);
+        }
+        
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .feedback.correct {
+            background: rgba(46, 204, 113, 0.1);
+            border-left: 5px solid var(--correct);
+            color: var(--correct);
+        }
+        
+        .feedback.incorrect {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 5px solid var(--incorrect);
+            color: var(--incorrect);
+        }
+        
+        .next-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 0 0 auto;
+            display: block;
+            transition: all 0.3s;
+        }
+        
+        .next-btn:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Resultados */
+        .results-container {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin: 30px 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .results-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--highlight);
+        }
+        
+        .time-taken {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        
+        .badges-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        .badge {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #f1f1f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .badge.unlocked {
+            background: linear-gradient(135deg, var(--highlight), #f39c12);
+            color: white;
+        }
+        
+        .badge i {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .badge-text {
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        /* Modo Examen */
+        .exam-mode {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        /* Modal de Bienvenida */
+        .welcome-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.5s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-content h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 2em;
+            background: linear-gradient(135deg, var(--female-color), var(--male-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .modal-content p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #e74c3c;
+            transform: rotate(90deg);
+        }
+        
+        .modal-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .modal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 0.95em;
+            margin-top: 60px;
+            position: relative;
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--female-color), var(--male-color));
+        }
+        
+        .highlight {
+            color: var(--highlight);
+            font-weight: bold;
+        }
+        
+        .credits {
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Modal de Bienvenida -->
+    <div id="welcomeModal" class="welcome-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeWelcomeModal()">&times;</span>
+            <h2>¡Bienvenido al Sistema Urinario Interactivo!</h2>
+            <p>Este recurso educativo fue desarrollado por <strong>Efraín Wlises González Sandoval</strong> como herramienta de aprendizaje para el estudio del sistema urinario humano.</p>
+            <p>Explora las características anatómicas tanto del sistema femenino como masculino, y pon a prueba tus conocimientos con nuestros modos de práctica y examen.</p>
+            <p><strong>¡Comencemos!</strong></p>
+            <button class="modal-btn" onclick="closeWelcomeModal()">Entendido</button>
+        </div>
+    </div>
+    
+    <!-- Header con logo DGETI -->
+    <div class="header">
+        <img src="https://www.dgeti.sems.gob.mx/images/logo_dgeti.png" alt="Logo DGETI">
+        <h1>CBTIS 38 "Josefa Ortiz de Domínguez"</h1>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="container">
+        <h1 class="title">Sistema Urinario Interactivo</h1>
+        
+        <p style="text-align: center; font-size: 1.2em; max-width: 800px; margin: 0 auto 30px;">
+            Proyecto educativo interactivo desarrollado por<br>
+            <span style="font-size: 1.4em; font-weight: bold;">Efraín Wlises González Sandoval</span>
+        </p>
+        
+        <!-- Pestañas de género -->
+        <div class="gender-tabs">
+            <button id="female-tab" class="gender-tab" onclick="showGender('female')">Sistema Femenino 👩</button>
+            <button id="male-tab" class="gender-tab" onclick="showGender('male')">Sistema Masculino 👨</button>
+        </div>
+        
+        <!-- Sistema Urinario Femenino -->
+        <div id="female-section" class="gender-section">
+            <div id="female-header" class="gender-header">
+                👩 Sistema Urinario Femenino
+            </div>
+            <div class="parts-grid">
+                <div class="part-card female-part">
+                    <h3>Riñones</h3>
+                    <p>Órganos pares que filtran aproximadamente 180 litros de sangre diariamente, produciendo 1-2 litros de orina. Regulan el equilibrio electrolítico y la presión arterial.</p>
+                </div>
+                <div class="part-card female-part">
+                    <h3>Uréteres</h3>
+                    <p>Tubos musculares de 25-30 cm de longitud que transportan orina desde los riñones hasta la vejiga mediante movimientos peristálticos.</p>
+                </div>
+                <div class="part-card female-part">
+                    <h3>Vejiga Urinaria</h3>
+                    <p>Órgano muscular hueco con capacidad de 300-500 ml. El músculo detrusor se contrae durante la micción. Epitelio transicional permite distensión.</p>
+                </div>
+                <div class="part-card female-part">
+                    <h3>Uretra Femenina</h3>
+                    <p>Mide aproximadamente 4 cm. Recorre desde el cuello vesical hasta el meato urinario en el vestíbulo vaginal. Esfínter externo voluntario.</p>
+                </div>
+                <div class="part-card female-part">
+                    <h3>Meato Urinario</h3>
+                    <p>Orificio externo de la uretra, ubicado entre el clítoris y el orificio vaginal. Revestido por epitelio estratificado plano.</p>
+                </div>
+                <div class="part-card female-part">
+                    <h3>Esfínteres Uretrales</h3>
+                    <p>Interno (involuntario) de músculo liso y externo (voluntario) de músculo estriado. Controlan la continencia urinaria.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sistema Urinario Masculino -->
+        <div id="male-section" class="gender-section">
+            <div id="male-header" class="gender-header">
+                👨 Sistema Urinario Masculino
+            </div>
+            <div class="parts-grid">
+                <div class="part-card male-part">
+                    <h3>Riñones</h3>
+                    <p>Filtran la sangre a través de aproximadamente 1 millón de nefronas cada uno. Producen renina y eritropoyetina.</p>
+                </div>
+                <div class="part-card male-part">
+                    <h3>Uréteres</h3>
+                    <p>Descienden retroperitonealmente y atraviesan la pared vesical oblicuamente, previniendo el reflujo vesicoureteral.</p>
+                </div>
+                <div class="part-card male-part">
+                    <h3>Vejiga Urinaria</h3>
+                    <p>Ubicada posterior a la sínfisis púbica. En su base se encuentran los orificios ureterales y el orificio uretral interno.</p>
+                </div>
+                <div class="part-card male-part">
+                    <h3>Uretra Masculina</h3>
+                    <p>Mide 18-20 cm. Dividida en tres porciones: prostática (3 cm), membranosa (1 cm) y esponjosa (15 cm).</p>
+                </div>
+                <div class="part-card male-part">
+                    <h3>Próstata</h3>
+                    <p>Glándula que rodea la uretra prostática. Su hipertrofia puede causar obstrucción del flujo urinario.</p>
+                </div>
+                <div class="part-card male-part">
+                    <h3>Glándulas Bulbouretrales</h3>
+                    <p>Secretan líquido alcalino que neutraliza la acidez uretral. No forman parte directa del sistema urinario pero interactúan.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botones de acción -->
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <button id="startQuiz" class="action-btn" onclick="startQuiz(false)">
+                <i class="fas fa-gamepad"></i> Modo Práctica
+            </button>
+            <button id="startExam" class="action-btn exam-mode" onclick="startQuiz(true)">
+                <i class="fas fa-clock"></i> Modo Examen
+            </button>
+        </div>
+        
+        <!-- Contenedor del Quiz -->
+        <div id="quiz-container" class="quiz-container">
+            <button class="back-btn" onclick="returnToMain()">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </button>
+            <div class="quiz-header">
+                <div class="question-counter">Pregunta 1 de 50</div>
+                <div class="timer" id="quiz-timer">00:00</div>
+            </div>
+            <div class="question-text" id="question-text">¿Cuál es la función principal de los riñones?</div>
+            <div class="options-container" id="options-container">
+                <!-- Las opciones se generan dinámicamente -->
+            </div>
+            <div class="feedback" id="feedback">
+                ¡Correcto! Los riñones son los principales filtros de la sangre.
+            </div>
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente <i class="fas fa-arrow-right"></i></button>
+        </div>
+        
+        <!-- Contenedor de Resultados -->
+        <div id="results-container" class="results-container">
+            <h2 class="results-title">¡Resultados Finales!</h2>
+            <div class="score" id="final-score">18/50</div>
+            <div class="time-taken" id="time-taken">Tiempo: 4 minutos 22 segundos</div>
+            
+            <div class="badges-container" id="badges-container">
+                <div class="badge unlocked">
+                    <i class="fas fa-medal"></i>
+                    <span class="badge-text">Aprendiz</span>
+                </div>
+                <div class="badge unlocked">
+                    <i class="fas fa-trophy"></i>
+                    <span class="badge-text">Rápido</span>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-crown"></i>
+                    <span class="badge-text">Experto</span>
+                </div>
+            </div>
+            
+            <button class="action-btn" onclick="resetQuiz()">
+                <i class="fas fa-redo"></i> Volver a Intentar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Footer legal -->
+    <div class="footer">
+        <p><span class="highlight">© 2025-2030 Todos los derechos reservados</span></p>
+        <p>Proyecto educativo propiedad exclusiva de <span class="highlight">Efraín Wlises González Sandoval</span></p>
+        <p>CBTIS 38 "Josefa Ortiz de Domínguez" | DGETI</p>
+        <p>Calle Javier Vargas N # 5330 Fracc. Paseos del Sol, 45079 Zapopan, Jalisco</p>
+        <div class="credits">
+            <p>Elaborado con fines educativos | Anatomía y Fisiología Humana</p>
+        </div>
+    </div>
+    
+    <!-- Audio para efectos de sonido -->
+    <audio id="correctSound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+    <audio id="incorrectSound" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" preload="auto"></audio>
+    
+    <script>
+        // Variables del juego
+        let currentQuestion = 0;
+        let score = 0;
+        let timer = 0;
+        let timerInterval;
+        let isExamMode = false;
+        let questions = [];
+        
+        // Elementos de audio
+        const correctSound = document.getElementById('correctSound');
+        const incorrectSound = document.getElementById('incorrectSound');
+        
+        // Preguntas del sistema urinario (50 preguntas)
+        const femaleQuestions = [
+            {
+                question: "¿Cuál es la longitud aproximada de la uretra femenina?",
+                options: ["2 cm", "4 cm", "8 cm", "12 cm"],
+                answer: 1,
+                explanation: "La uretra femenina mide aproximadamente 4 cm de longitud, mucho más corta que la masculina."
+            },
+            {
+                question: "¿Dónde se encuentra ubicado el meato urinario femenino?",
+                options: ["Dentro de la vagina", "Entre el clítoris y el orificio vaginal", "En el perineo posterior", "En el monte de Venus"],
+                answer: 1,
+                explanation: "El meato urinario femenino se localiza en el vestíbulo vaginal, entre el clítoris y el orificio vaginal."
+            },
+            {
+                question: "¿Qué tipo de epitelio recubre la vejiga urinaria?",
+                options: ["Epitelio estratificado plano", "Epitelio cilíndrico simple", "Epitelio transicional", "Epitelio pseudoestratificado"],
+                answer: 2,
+                explanation: "La vejiga está revestida por epitelio transicional (urotelio) que permite su distensión durante el llenado."
+            },
+            {
+                question: "¿Cuál es la capacidad promedio de la vejiga femenina?",
+                options: ["100-150 ml", "300-500 ml", "700-900 ml", "1-1.5 litros"],
+                answer: 1,
+                explanation: "La capacidad vesical promedio es de 300-500 ml, aunque puede variar según la persona."
+            },
+            {
+                question: "¿Qué músculo se contrae durante la micción?",
+                options: ["Músculo piriforme", "Músculo detrusor", "Músculo elevador del ano", "Músculo obturador interno"],
+                answer: 1,
+                explanation: "El músculo detrusor de la vejiga se contrae para expulsar la orina, mientras los esfínteres se relajan."
+            },
+            {
+                question: "¿Qué estructura anatómica es exclusiva del sistema urinario femenino?",
+                options: ["Próstata", "Glándulas bulbouretrales", "Meato urinario en el vestíbulo vaginal", "Conductos eyaculadores"],
+                answer: 2,
+                explanation: "El meato urinario en el vestíbulo vaginal es exclusivo de la anatomía femenina."
+            },
+            {
+                question: "¿Qué factor contribuye a que las mujeres tengan mayor riesgo de infecciones urinarias?",
+                options: ["Longitud de la uretra", "Presencia de próstata", "Posición de los riñones", "Tamaño de la vejiga"],
+                answer: 0,
+                explanation: "La uretra femenina más corta facilita el ascenso de bacterias hacia la vejiga."
+            },
+            {
+                question: "¿Qué hormona afecta la tonicidad del músculo detrusor en mujeres?",
+                options: ["Testosterona", "Estrógeno", "Insulina", "Tiroxina"],
+                answer: 1,
+                explanation: "Los estrógenos influyen en la tonicidad del músculo detrusor y la vascularización del tracto urinario."
+            }
+        ];
+        
+        const maleQuestions = [
+            {
+                question: "¿Cuál es la longitud aproximada de la uretra masculina?",
+                options: ["5-8 cm", "10-12 cm", "18-20 cm", "25-30 cm"],
+                answer: 2,
+                explanation: "La uretra masculina mide entre 18-20 cm, mucho más larga que la femenina."
+            },
+            {
+                question: "¿Qué porción de la uretra masculina atraviesa la próstata?",
+                options: ["Porción esponjosa", "Porción membranosa", "Porción prostática", "Porción bulbar"],
+                answer: 2,
+                explanation: "La porción prostática (de unos 3 cm) atraviesa la glándula prostática."
+            },
+            {
+                question: "¿Qué estructura puede causar obstrucción urinaria en hombres mayores?",
+                options: ["Vesículas seminales", "Glándulas bulbouretrales", "Próstata agrandada", "Conductos deferentes"],
+                answer: 2,
+                explanation: "La hiperplasia prostática benigna es común en hombres mayores y puede comprimir la uretra."
+            },
+            {
+                question: "¿Qué líquido secretan las glándulas bulbouretrales?",
+                options: ["Orina concentrada", "Líquido alcalino", "Sangre", "Líquido cefalorraquídeo"],
+                answer: 1,
+                explanation: "Secretan un líquido alcalino que neutraliza la acidez residual en la uretra."
+            },
+            {
+                question: "¿Cuál es la porción más estrecha de la uretra masculina?",
+                options: ["Porción prostática", "Porción esponjosa", "Porción membranosa", "Fosa navicular"],
+                answer: 2,
+                explanation: "La porción membranosa (de 1 cm) es la más estrecha y fija de la uretra masculina."
+            },
+            {
+                question: "¿Qué estructura del sistema urinario masculino también forma parte del sistema reproductor?",
+                options: ["Uréteres", "Vejiga urinaria", "Uretra", "Riñones"],
+                answer: 2,
+                explanation: "La uretra masculina sirve tanto para la excreción de orina como para la eyaculación."
+            },
+            {
+                question: "¿Qué condición es más común en hombres debido a la anatomía del sistema urinario?",
+                options: ["Infecciones urinarias recurrentes", "Cálculos en la próstata", "Obstrucción uretral", "Incontinencia por estrés"],
+                answer: 2,
+                explanation: "Los hombres son más propensos a obstrucciones uretrales debido a la próstata y la mayor longitud uretral."
+            }
+        ];
+        
+        // Preguntas generales (completar hasta 50)
+        const generalQuestions = [
+            {
+                question: "¿Cuántos litros de sangre filtran los riñones diariamente?",
+                options: ["50-70 litros", "100-120 litros", "150-180 litros", "200-220 litros"],
+                answer: 2,
+                explanation: "Los riñones filtran aproximadamente 180 litros de sangre al día, produciendo 1-2 litros de orina."
+            },
+            {
+                question: "¿Qué hormona producen los riñones para estimular la producción de glóbulos rojos?",
+                options: ["Insulina", "Eritropoyetina", "Adrenalina", "Tiroxina"],
+                answer: 1,
+                explanation: "La eritropoyetina es producida por los riñones y estimula la médula ósea para producir eritrocitos."
+            },
+            {
+                question: "¿Qué estructura del riñón contiene las nefronas?",
+                options: ["Pelvis renal", "Corteza renal", "Cápsula de Bowman", "Uréter"],
+                answer: 1,
+                explanation: "La corteza renal contiene los corpúsculos renales y las nefronas, unidades funcionales del riñón."
+            },
+            {
+                question: "¿Qué movimiento permite a los uréteres transportar orina?",
+                options: ["Movimientos ciliares", "Peristaltismo", "Movimiento pendular", "Contracciones tónicas"],
+                answer: 1,
+                explanation: "Los uréteres tienen músculo liso que realiza movimientos peristálticos para impulsar la orina."
+            },
+            {
+                question: "¿Cuál es la función principal del sistema urinario?",
+                options: ["Producción de hormonas", "Filtración de sangre y eliminación de desechos", "Producción de células sanguíneas", "Digestión de alimentos"],
+                answer: 1,
+                explanation: "Su función principal es filtrar la sangre, regular electrolitos y eliminar desechos como urea y creatinina."
+            },
+            {
+                question: "¿Qué estructura impide el reflujo de orina de la vejiga a los uréteres?",
+                options: ["Válvula ileocecal", "Esfínter uretral", "Unión ureterovesical", "Cápsula renal"],
+                answer: 2,
+                explanation: "La unión ureterovesical tiene un mecanismo valvular que previene el reflujo vesicoureteral."
+            },
+            {
+                question: "¿Qué célula renal actúa como osmorreceptor?",
+                options: ["Podocitos", "Células yuxtaglomerulares", "Células principales", "Células macula densa"],
+                answer: 1,
+                explanation: "Las células yuxtaglomerulares detectan cambios en la osmolaridad y volumen sanguíneo."
+            },
+            {
+                question: "¿Dónde ocurre la mayor parte de la reabsorción de agua?",
+                options: ["Túbulo contorneado proximal", "Asa de Henle", "Túbulo contorneado distal", "Túbulo colector"],
+                answer: 3,
+                explanation: "El túbulo colector es donde ocurre la reabsorción final de agua, regulada por la ADH."
+            },
+            {
+                question: "¿Qué sustancia NO se encuentra normalmente en la orina?",
+                options: ["Urea", "Glucosa", "Creatinina", "Ácido úrico"],
+                answer: 1,
+                explanation: "La glucosa es completamente reabsorbida en condiciones normales. Su presencia indica diabetes."
+            },
+            {
+                question: "¿Qué arteria suministra sangre a los riñones?",
+                options: ["Arteria mesentérica", "Arteria renal", "Arteria ilíaca", "Arteria aorta"],
+                answer: 1,
+                explanation: "Las arterias renales, ramas de la aorta abdominal, suministran sangre a los riñones."
+            },
+            {
+                question: "¿Qué estructura renal filtra inicialmente la sangre?",
+                options: ["Túbulo colector", "Glomérulo", "Asa de Henle", "Pelvis renal"],
+                answer: 1,
+                explanation: "El glomérulo es el sitio de filtración inicial donde el plasma sanguíneo entra a la cápsula de Bowman."
+            },
+            {
+                question: "¿Qué hormona aumenta la reabsorción de agua en los túbulos colectores?",
+                options: ["Aldosterona", "Hormona antidiurética (ADH)", "Calcitonina", "Glucagón"],
+                answer: 1,
+                explanation: "La ADH aumenta la permeabilidad al agua en los túbulos colectores, concentrando la orina."
+            },
+            {
+                question: "¿Qué condición resulta de la formación de cristales en el tracto urinario?",
+                options: ["Cistitis", "Pielonefritis", "Cálculos renales", "Uretritis"],
+                answer: 2,
+                explanation: "Los cálculos renales (nefrolitiasis) son depósitos sólidos de minerales que se forman en el riñón."
+            },
+            {
+                question: "¿Qué parte de la nefrona es responsable de la reabsorción de glucosa?",
+                options: ["Asa de Henle", "Túbulo contorneado proximal", "Túbulo colector", "Cápsula de Bowman"],
+                answer: 1,
+                explanation: "El túbulo contorneado proximal reabsorbe activamente glucosa, aminoácidos y otros nutrientes."
+            },
+            {
+                question: "¿Qué electrolito es regulado principalmente por los riñones?",
+                options: ["Sodio", "Yodo", "Flúor", "Cobre"],
+                answer: 0,
+                explanation: "Los riñones regulan principalmente el sodio, potasio, calcio y otros electrolitos clave."
+            },
+            {
+                question: "¿Qué estructura transporta la orina desde la pelvis renal hasta la vejiga?",
+                options: ["Uretra", "Uréter", "Arteria renal", "Túbulo colector"],
+                answer: 1,
+                explanation: "Los uréteres son los conductos musculares que transportan orina desde los riñones hasta la vejiga."
+            },
+            {
+                question: "¿Qué condición se caracteriza por la incapacidad de controlar la micción?",
+                options: ["Oliguria", "Poliuria", "Incontinencia urinaria", "Retención urinaria"],
+                answer: 2,
+                explanation: "La incontinencia urinaria es la pérdida del control voluntario de la vejiga."
+            },
+            {
+                question: "¿Qué examen mide la capacidad de filtración glomerular?",
+                options: ["Examen de orina completo", "Tasa de filtración glomerular (TFG)", "Urografía excretora", "Cistoscopia"],
+                answer: 1,
+                explanation: "La TFG es el mejor indicador de la función renal y cuantifica el volumen filtrado por los glomérulos."
+            },
+            {
+                question: "¿Qué vitamina es activada por los riñones?",
+                options: ["Vitamina A", "Vitamina C", "Vitamina D", "Vitamina K"],
+                answer: 2,
+                explanation: "Los riñones convierten la vitamina D en su forma activa (calcitriol) que regula el metabolismo del calcio."
+            },
+            {
+                question: "¿Qué estructura forma la orina final que será excretada?",
+                options: ["Glomérulo", "Túbulo contorneado distal", "Túbulo colector", "Pelvis renal"],
+                answer: 2,
+                explanation: "El túbulo colector recibe orina de múltiples nefronas y forma la orina final que pasa a la pelvis renal."
+            },
+            {
+                question: "¿Qué condición se caracteriza por niveles anormalmente bajos de orina?",
+                options: ["Poliuria", "Oliguria", "Nicturia", "Disuria"],
+                answer: 1,
+                explanation: "Oliguria es la producción de menos de 400 ml de orina por día, indicando posible fallo renal."
+            },
+            {
+                question: "¿Qué estructura separa la corteza renal de la médula renal?",
+                options: ["Cápsula renal", "Arcos renales", "Columnas renales", "Pirámides renales"],
+                answer: 1,
+                explanation: "Los arcos renales son la frontera anatómica entre la corteza y médula renal."
+            },
+            {
+                question: "¿Qué tipo de célula forma la capa visceral del glomérulo?",
+                options: ["Podocitos", "Células mesangiales", "Células epiteliales", "Macrófagos"],
+                answer: 0,
+                explanation: "Los podocitos son células especializadas que forman la capa visceral de la cápsula de Bowman."
+            },
+            {
+                question: "¿Qué condición es causada por la inflamación de los glomérulos renales?",
+                options: ["Glomerulonefritis", "Pielonefritis", "Cistitis", "Uretritis"],
+                answer: 0,
+                explanation: "La glomerulonefritis es la inflamación de los glomérulos, a menudo de origen autoinmune o infeccioso."
+            },
+            {
+                question: "¿Qué estructura renal contiene las pirámides de Malpighi?",
+                options: ["Corteza renal", "Médula renal", "Pelvis renal", "Hilio renal"],
+                answer: 1,
+                explanation: "La médula renal contiene las pirámides renales (de Malpighi) formadas por túbulos colectores."
+            },
+            {
+                question: "¿Qué sustancia es el principal producto de desecho del metabolismo de las proteínas?",
+                options: ["Ácido úrico", "Urea", "Creatinina", "Ammonio"],
+                answer: 1,
+                explanation: "La urea es el principal producto de desecho del metabolismo de proteínas, eliminada por los riñones."
+            },
+            {
+                question: "¿Qué condición se caracteriza por micción frecuente durante la noche?",
+                options: ["Poliuria", "Oliguria", "Nicturia", "Disuria"],
+                answer: 2,
+                explanation: "Nicturia es la necesidad de orinar frecuentemente durante la noche, común en problemas prostáticos o cardiacos."
+            },
+            {
+                question: "¿Qué estructura renal contiene el aparato yuxtaglomerular?",
+                options: ["Túbulo contorneado distal", "Túbulo contorneado proximal", "Asa de Henle", "Túbulo colector"],
+                answer: 0,
+                explanation: "El aparato yuxtaglomerular se encuentra donde el túbulo distal contacta con la arteriola aferente."
+            },
+            {
+                question: "¿Qué condición resulta de la acumulación de productos nitrogenados en sangre?",
+                options: ["Acidosis", "Alcalosis", "Uremia", "Hipercalcemia"],
+                answer: 2,
+                explanation: "La uremia es la acumulación de urea y otros desechos nitrogenados debido a fallo renal."
+            }
+        ];
+        
+        // Mostrar modal de bienvenida al cargar la página
+        window.onload = function() {
+            document.getElementById('welcomeModal').style.display = 'flex';
+        };
+        
+        // Cerrar modal de bienvenida
+        function closeWelcomeModal() {
+            document.getElementById('welcomeModal').style.display = 'none';
+        }
+        
+        // Mostrar sección por género
+        function showGender(gender) {
+            document.querySelectorAll('.gender-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${gender}-section`).classList.add('active');
+            
+            // Efecto visual en los botones
+            document.getElementById('female-tab').style.transform = gender === 'female' ? 'scale(1.05)' : 'scale(1)';
+            document.getElementById('male-tab').style.transform = gender === 'male' ? 'scale(1.05)' : 'scale(1)';
+        }
+        
+        // Mostrar sistema femenino por defecto
+        showGender('female');
+        
+        // Iniciar el quiz
+        function startQuiz(examMode) {
+            isExamMode = examMode;
+            currentQuestion = 0;
+            score = 0;
+            timer = 0;
+            
+            // Mezclar preguntas para cada quiz (50 preguntas)
+            questions = [...femaleQuestions, ...maleQuestions, ...generalQuestions]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 50);
+            
+            // Ocultar secciones y mostrar quiz
+            document.querySelectorAll('.gender-section').forEach(s => s.style.display = 'none');
+            document.querySelector('.gender-tabs').style.display = 'none';
+            document.getElementById('startQuiz').style.display = 'none';
+            document.getElementById('startExam').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('results-container').style.display = 'none';
+            
+            // Iniciar temporizador si es modo examen
+            if(isExamMode) {
+                document.getElementById('quiz-timer').style.display = 'block';
+                startTimer();
+            } else {
+                document.getElementById('quiz-timer').style.display = 'none';
+            }
+            
+            showQuestion();
+        }
+        
+        // Mostrar pregunta actual
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-text').textContent = question.question;
+            document.querySelector('.question-counter').textContent = `Pregunta ${currentQuestion + 1} de 50`;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+            
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+        }
+        
+        // Seleccionar respuesta
+        function selectAnswer(selectedIndex) {
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback');
+            
+            // Deshabilitar todos los botones
+            options.forEach(option => {
+                option.onclick = null;
+                option.style.cursor = 'default';
+            });
+            
+            // Marcar respuesta correcta/incorrecta
+            options.forEach((option, index) => {
+                if(index === question.answer) {
+                    option.classList.add('correct');
+                } else if(index === selectedIndex && index !== question.answer) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Reproducir sonido según respuesta
+            if(selectedIndex === question.answer) {
+                correctSound.play();
+                score++;
+            } else {
+                incorrectSound.play();
+            }
+            
+            // Mostrar retroalimentación
+            feedback.textContent = selectedIndex === question.answer 
+                ? `¡Correcto! ${question.explanation}` 
+                : `Incorrecto. La respuesta correcta es: ${question.options[question.answer]}. ${question.explanation}`;
+            
+            feedback.className = selectedIndex === question.answer ? 'feedback correct' : 'feedback incorrect';
+            feedback.style.display = 'block';
+            
+            // Mostrar botón siguiente
+            document.getElementById('next-btn').style.display = 'block';
+        }
+        
+        // Siguiente pregunta
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if(currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+        
+        // Finalizar quiz
+        function endQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('quiz-container').style.display = 'none';
+            
+            // Mostrar resultados
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.style.display = 'block';
+            
+            document.getElementById('final-score').textContent = `${score}/50`;
+            document.getElementById('time-taken').textContent = `Tiempo: ${formatTime(timer)}`;
+            
+            // Actualizar medallas
+            const badges = document.querySelectorAll('.badge');
+            badges[0].classList.add('unlocked'); // Siempre desbloqueada
+            
+            if(score >= 30) {
+                badges[1].classList.add('unlocked');
+            }
+            
+            if(score >= 45 && isExamMode) {
+                badges[2].classList.add('unlocked');
+            }
+        }
+        
+        // Regresar al menú principal
+        function returnToMain() {
+            clearInterval(timerInterval);
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('results-container').style.display = 'none';
+            
+            document.querySelector('.gender-tabs').style.display = 'flex';
+            document.getElementById('startQuiz').style.display = 'block';
+            document.getElementById('startExam').style.display = 'block';
+            showGender('female');
+        }
+        
+        // Reiniciar quiz
+        function resetQuiz() {
+            document.getElementById('results-container').style.display = 'none';
+            startQuiz(isExamMode);
+        }
+        
+        // Temporizador
+        function startTimer() {
+            timer = 0;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timer++;
+                updateTimerDisplay();
+                
+                // En modo examen, finalizar después de 15 minutos (900 segundos)
+                if(isExamMode && timer >= 900) {
+                    clearInterval(timerInterval);
+                    endQuiz();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            document.getElementById('quiz-timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes} minuto${minutes !== 1 ? 's' : ''} ${secs} segundo${secs !== 1 ? 's' : ''}`;
+        }
+    </script>
+</body>
+</html>
